@@ -18,6 +18,43 @@ In practice, this took X time.  This includes
 Consider the following questions:
 
 1. What is a simple model that would predict this time?
-2. What about a simple model to predict time for one person to count?
-3. How big should the class be before the parallel method takes less time?
+Time to start the process = T_process
+Time to compute biggest row count = T_row_fast
+Time to compute slowest row count = T_row_slow
+Time for instructor to gather counts = T_gathering
+Time for instructor to do the arithmetic = T_arithmetic
 
+T_process + T_row_fast		will give us the first time when we receive the initial count
+T_gathering			will give us the commuincation time between instructor and student to gather the counts
+We need to simply add T_process + T_row_fast + T_gathering + T_arithmetic
+
+Note that T_gathering and T_arithmetic are TOTAL TIME spent. Since getting responses from students will be parallelized,
+we will use pipelining and fastest process will determine our speed, later while we are calculating and gathering the result
+information will keep flowing, so we do not need to worr about the time that other rows spend while computing. (Unless the difference
+T_row_slow - T_row_fast > T_gathering + T_arithmetic)
+
+2. What about a simple model to predict time for one person to count?
+T_count		total time to count all students with one person
+x		how many students a row has
+total		total number of students
+
+if "total" number of students will take "T_count" of time, how much time does it take to count "x" number of students?
+(x * T_count ) / total
+
+3. How big should the class be before the parallel method takes less time?
+T_row_avg	Average number of students for each row
+N		Number of rows
+
+T_process + T_row_avg * N				Time for serial work
+T_process + T_row_fast + T_gathering + T_arithmetic	Time for parallel work
+
+we can say that T_row_fast <= T_row_avg
+
+And we want 
+T_process + T_row_fast + T_gathering + T_arithmetic < T_process + T_row_avg * N
+T_row_avg * N >  T_row_fast + T_gathering + T_arithmetic
+
+Since, we can say that T_row_fast <= T_row_avg, let's assume T_row_fast = T_row_avg
+
+N > T_gathering + T_arithmetic
+Number of rows should be more than T_gathering + T_arithmetic
